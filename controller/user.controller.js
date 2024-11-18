@@ -162,6 +162,66 @@ class UserController {
       }
     }
   }
+
+  /**
+   *
+   * @param {id} default id of the user from mongoDB, from req.query
+   * @param {data} data of what will be updated, from req.body
+   */
+  async editStudent ({ id, data }) {
+    
+
+    try {
+      // Find the student by ID
+      const student = await Student.findById(id)
+      if (!student) {
+        throw new Error('Student not found!')
+      }
+
+      // Only allow updates to valid fields
+      const allowedUpdates = ['studentName', 'studentContact', 'password', 'studentMajor']
+      const updateKeys = Object.keys(data)
+
+      // Validate the fields being updated
+      const isValidUpdate = updateKeys.every(key =>
+        allowedUpdates.includes(key)
+      )
+      if (!isValidUpdate) {
+        throw new Error('Invalid fields in the update request!')
+      }
+
+      // If password is being updated, hash it
+      if (data.password) {
+        data.password = await bcrypt.hash(data.password, 10)
+      }
+
+      // Apply the updates
+      updateKeys.forEach(key => {
+        student[key] = data[key]
+      })
+
+      // Save the updated student document
+      await student.save()
+
+      return {
+        statusCode: 200,
+        message: 'Student profile updated successfully!',
+        user: {
+          id: student.mentorId,
+          studentName: student.studentName,
+          studentContact: student.studentContact,
+          studentMajor: student.studentMajor
+        }
+      }
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: error.message
+      }
+    }
+  }
+
+  
 }
 
 const userController = new UserController()
