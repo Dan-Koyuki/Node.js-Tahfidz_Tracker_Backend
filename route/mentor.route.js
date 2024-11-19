@@ -21,8 +21,9 @@ MentorRoute.put("/:id", async (req, res) => {
 
 /**
  * List of Recites that was handled by a Mentor
+ * @param {string} id - id of the mentor
  */
-MentorRoute.get("/:id", async (req, res) => {
+MentorRoute.get("/:id/recites", async (req, res) => {
   try {
     const response = await mentorController.viewRecite({
       id: req.params.id, // id of the mentor from mongoDB
@@ -34,11 +35,35 @@ MentorRoute.get("/:id", async (req, res) => {
 });
 
 /**
- * Review a Recite
+ * @param {string} id - id of the mentor
  */
-MentorRoute.post("/review", async (req, res) => {
+MentorRoute.get("/:id/students", async (req, res) => {
   try {
-    const response = await mentorController.reviewRecite(req.body);
+    const response = await mentorController.viewStudent({
+      id: req.params.id, // id of the mentor from mongoDB
+    });
+    handleSuccess(res, response);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+/**
+ * Review a Recite
+ * @param {string} id - id of the recite
+ */
+MentorRoute.post("/:id/review", async (req, res) => {
+  try {
+    const response = await mentorController.reviewRecite({id:req.params.id, data:req.body});
+    handleSuccess(res, response);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+MentorRoute.get("/", async (req, res) => {
+  try {
+    const response = await mentorController.getAllMentor();
     handleSuccess(res, response);
   } catch (error) {
     handleError(res, error);

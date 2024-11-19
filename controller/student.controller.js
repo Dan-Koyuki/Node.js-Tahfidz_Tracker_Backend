@@ -19,57 +19,42 @@ class StudentController {
    * }
    */
   async uploadRecite({ id, data }) {
-    if (!id) {
-      throw new Error("Invalid ID!");
+    if (!id) throw new CustomError(400, "Invalid ID!");
+
+    const student = await Student.findById(id).populate("mentor");
+
+    if (!student) throw new CustomError(404, "Student not found!");
+
+    if (!student.mentor)
+      throw new CustomError(404, "Mentor not found for this student!");
+
+    data.reciteStudent = student.studentName;
+    data.reciteMentor = student.studentMentor.mentorName;
+
+    const reciteField = [
+      "reciteSurah",
+      "reciteAyat",
+      "reciteLink",
+      "reciteStudent",
+      "reciteMentor",
+    ];
+    const dataKeys = Object.keys(data);
+    const invalidKeys = dataKeys.filter((key) => !reciteField.includes(key));
+    if (invalidKeys.length > 0) {
+      throw new CustomError(
+        400,
+        `Invalid fields detected: ${invalidKeys.join(", ")}`
+      );
     }
 
-    try {
-      const student = await Student.findById(id).populate("mentor");
+    const recite = new Recite(data);
 
-      if (!student) {
-        throw new Error("Student not found!");
-      }
+    await recite.save();
 
-      if (!student.mentor) {
-        throw new Error("Mentor not found for this student!");
-      }
-
-      data.reciteStudent = student.studentName;
-      data.reciteMentor = student.studentMentor.mentorName;
-
-      const reciteField = [
-        "reciteSurah",
-        "reciteAyat",
-        "reciteLink",
-        "reciteStudent",
-        "reciteMentor",
-      ];
-      const dataKeys = Object.keys(data);
-
-      const isValid =
-        reciteField.every((key) => dataKeys.includes(key)) &&
-        dataKeys.every((key) => reciteField.includes(key));
-      if (!isValid) {
-        throw new Error("Missing some fields! Please fill the form correctly!");
-      }
-
-      const recite = new Recite(data);
-
-      await recite.save();
-
-      return {
-        statusCode: 200,
-        message: "Recite had been uploaded.",
-        recite: {
-          _id: recite._id,
-        },
-      };
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message,
-      };
-    }
+    return {
+      statusCode: 200,
+      data: { message: "Recite had been uploaded.", recite: recite },
+    };
   }
 
   /**
@@ -78,88 +63,94 @@ class StudentController {
    * @param {data} data of what will be updated, from req.body
    */
   async editStudent({ id, data }) {
-    try {
-      // Find the student by ID
-      const student = await Student.findById(id);
-      if (!student) {
-        throw new Error("Student not found!");
-      }
+    if (!id) throw new CustomError(400, "Invalid ID!");
+    if (!data) throw new CustomError(400, "Data can't be empty!");
 
-      // Only allow updates to valid fields
-      const allowedUpdates = [
-        "studentName",
-        "studentContact",
-        "password",
-        "studentMajor",
-      ];
-      const updateKeys = Object.keys(data);
-
-      // Validate the fields being updated
-      const isValidUpdate = updateKeys.every((key) =>
-        allowedUpdates.includes(key)
-      );
-      if (!isValidUpdate) {
-        throw new Error("Invalid fields in the update request!");
-      }
-
-      // Filter out any keys where data[key] is empty, null, or undefined
-      const validData = {};
-      updateKeys.forEach((key) => {
-        if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
-          validData[key] = data[key];
-        }
-      });
-
-      // If password is being updated, hash it
-      if (validData.password) {
-        validData.password = await bcrypt.hash(validData.password, 10);
-      }
-
-      // Apply the updates
-      Object.keys(validData).forEach((key) => {
-        student[key] = validData[key];
-      });
-
-      // Save the updated student document
-      await student.save();
-
-      return {
-        statusCode: 200,
-        message: "Student profile updated successfully!",
-        user: {
-          id: student.studentId, // Assuming `studentId` is the correct field
-          studentName: student.studentName,
-          studentContact: student.studentContact,
-          studentMajor: student.studentMajor,
-        },
-      };
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message,
-      };
+    // Find the student by ID
+    const student = await Student.findById(id);
+    if (!student) {
+      throw new CustomError(404, "Student not found!");
     }
+
+    // Only allow updates to valid fields
+    const allowedUpdates = [
+      "studentName",
+      "studentContact",
+      "password",
+      "studentMajor",
+    ];
+    const updateKeys = Object.keys(data);
+
+    // Check if all update fields are valid
+    const invalidKeys = updateKeys.filter(
+      (key) => !allowedUpdates.includes(key)
+    );
+    if (invalidKeys.length > 0) {
+      throw new CustomError(
+        400,
+        `Invalid fields detected: ${invalidKeys.join(", ")}`
+      );
+    }
+
+    // Filter out any keys where data[key] is empty, null, or undefined
+    const validData = {};
+    updateKeys.forEach((key) => {
+      if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
+        validData[key] = data[key];
+      }
+    });
+
+    // If password is being updated, hash it
+    if (validData.password) {
+      validData.password = await bcrypt.hash(validData.password, 10);
+    }
+
+    // Apply the updates
+    Object.assign(student, validData);
+
+    // Save the updated student document
+    await student.save();
+
+    return {
+      statusCode: 200,
+      data: {
+        message: "Student profile updated successfully!",
+        student: student,
+      },
+    };
   }
 
   async viewRecite({ id }) {
-    try {
-      const recites = await Recite.find({ reciteStudent: id });
+    if (!id) throw new CustomError(400, "ID can't be empty!");
+    const student = await Student.findById(id);
 
-      if (!recites.length) {
-        throw new Error("No recites found for this student.");
-      }
+    if (!student) throw new CustomError(404, "Student not found!");
 
-      return {
-        statusCode: 200,
+    const recites = await Recite.find({ reciteStudent: student.studentId });
+
+    if (!recites.length)
+      throw new CustomError(404, "No recites found for this student.");
+
+    return {
+      statusCode: 200,
+      data: {
         message: "Recites found.",
-        data: recites,
-      };
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message,
-      };
-    }
+        recites: recites,
+      },
+    };
+  }
+
+  async getAllStudent() {
+    const students = await Student.find();
+    if (!students.length) throw new CustomError(404, "No students found.");
+
+    return {
+      statusCode: 200,
+      data: {
+        message: "Students found.",
+        students: students,
+      },
+    };
   }
 }
 

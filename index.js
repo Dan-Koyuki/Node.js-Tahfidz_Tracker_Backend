@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import ActionRoute from "./route/action.route.js";
 import MentorRoute from "./route/mentor.route.js";
+import StudentRoute from "./route/student.route.js";
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/mentor", MentorRoute);
+app.use("/student", StudentRoute);
 app.use("/", ActionRoute);
 
 app.listen(PORT, () => {

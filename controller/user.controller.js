@@ -135,7 +135,7 @@ class UserController {
     };
   }
 
-  async viewRecite({ reciteId }) {
+  async detailRecite({ reciteId }) {
     if (!reciteId)
       throw new CustomError(400, "Invalid Id, please provide a correct Id!");
 

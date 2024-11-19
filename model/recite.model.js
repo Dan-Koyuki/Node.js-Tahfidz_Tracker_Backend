@@ -7,7 +7,7 @@ const ReciteSchema = new Schema(
     reciteAyat: { type: String, required: true },
     reciteLink: { type: String, required: true },
     reciteScore: { type: Number, default: 0 },
-    reciteReview: {type: String},
+    reciteReview: {type: String, default: ""},
     reciteStatus: {
       type: String,
       enum: ['PENDING', 'REVIEWED'],

@@ -13,4 +13,35 @@ ActionRoute.post("/register", async (req, res) => {
   }
 });
 
+ActionRoute.post("/login", async (req, res) => {
+  try {
+    const response = await userController.login(req.body);
+    handleSuccess(res, response);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+ActionRoute.get("/recite/:id", async (req, res) => {
+  try {
+    const response = await userController.detailRecite({
+      reciteId: req.params.id,
+    });
+    handleSuccess(res, response);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+// ActionRoute.delete("/recite/:id", async (req, res) => {
+//   try {
+//     const response = await userController.deleteRecite({
+//       reciteId: req.params.id,
+//     });
+//     handleSuccess(res, response);
+//   } catch (error) {
+//     handleError(res, error);
+//   }
+// });
+
 export default ActionRoute;

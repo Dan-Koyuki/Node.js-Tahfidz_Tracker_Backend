@@ -1,6 +1,7 @@
 import CustomError from "../function/customError.js";
 import Mentor from "../model/mentor.model.js";
 import Recite from "../model/recite.model.js";
+import Student from "../model/student.model.js";
 
 class MentorController {
   /**
@@ -55,11 +56,7 @@ class MentorController {
       statusCode: 200,
       data: {
         message: "Mentor profile updated successfully!",
-        user: {
-          id: mentor.mentorId,
-          mentorName: mentor.mentorName,
-          mentorContact: mentor.mentorContact,
-        },
+        mentor: mentor,
       },
     };
   }
@@ -126,6 +123,33 @@ class MentorController {
       data: {
         message: "Recite Updated!",
         recite: recite,
+      },
+    };
+  }
+
+  async viewStudent({id}) {
+    if (!id) throw new CustomError(400, "ID can't be empty!");
+    const mentor = await Mentor.findById(id);
+    if (!mentor) throw new CustomError(404, "Mentor not found!");
+    const students = await Student.find({ studentMentor: mentor.mentorId });
+    if (!students.length) throw new CustomError(404, "No students found!");
+    return {
+      statusCode: 200,
+      data: {
+        message: "Students found!",
+        students: students,
+      },
+    };
+  }
+
+  async getAllMentor() {
+    const mentors = await Mentor.find();
+    if (!mentors.length) throw new CustomError(404, "No mentors found!");
+    return {
+      statusCode: 200,
+      data: {
+        message: "Mentors found!",
+        mentors: mentors,
       },
     };
   }
