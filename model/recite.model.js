@@ -2,7 +2,6 @@ import { model, Schema } from 'mongoose'
 
 const ReciteSchema = new Schema(
   {
-    reciteID: { type: String, required: true, unique: true },
     reciteSurah: { type: String, required: true },
     reciteAyat: { type: String, required: true },
     reciteLink: { type: String, required: true },

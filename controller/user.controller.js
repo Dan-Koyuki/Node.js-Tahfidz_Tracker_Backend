@@ -139,13 +139,15 @@ class UserController {
     if (!reciteId)
       throw new CustomError(400, "Invalid Id, please provide a correct Id!");
 
-    const recite = await Recite.findById(reciteId);
+    const recite = await Recite.findById(reciteId)
+      .populate("student", "studentName")
+      .populate("mentor", "mentorName");
 
     if (!recite) throw new CustomError(404, "Recite not found!");
 
     return {
       statusCode: 200,
-      data: { message: "Recite successfully deleted", recite: recite },
+      data: { message: "Recite successfully fetched.", recite: recite },
     };
   }
 }

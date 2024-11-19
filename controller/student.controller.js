@@ -28,8 +28,8 @@ class StudentController {
     if (!student.mentor)
       throw new CustomError(404, "Mentor not found for this student!");
 
-    data.reciteStudent = student.studentName;
-    data.reciteMentor = student.studentMentor.mentorName;
+    data.reciteStudent = student.studentId;
+    data.reciteMentor = student.studentMentor.mentorId;
 
     const reciteField = [
       "reciteSurah",
