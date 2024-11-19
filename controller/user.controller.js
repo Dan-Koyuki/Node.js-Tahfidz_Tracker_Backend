@@ -1,24 +1,28 @@
-import bcrypt from 'bcrypt'
-import Mentor from '../model/mentor.model'
-import Student from '../model/student.model'
-import Recite from '../model/recite.model'
+import bcrypt from "bcrypt";
+import Mentor from "../model/mentor.model.js";
+import Student from "../model/student.model.js";
+import Recite from "../model/recite.model.js";
+import CustomError from "../function/customError.js";
 
 /**
  * @todo Implement JWT authentication for login and register endpoints.
  */
 class UserController {
-  async findUserByUsername (ref, username) {
-    if (ref === 'student') {
-      return await Student.findOne({ studentId: username })
-    } else if (ref === 'mentor') {
-      return await Mentor.findOne({ mentorId: username })
+  async findUserByUsername(ref, username) {
+    if (ref === "student") {
+      return await Student.findOne({ studentId: username });
+    } else if (ref === "mentor") {
+      return await Mentor.findOne({ mentorId: username });
     } else {
-      throw new Error("Invalid reference type! Must be 'student' or 'mentor'.")
+      throw new CustomError(
+        400,
+        "Invalid reference type! Must be 'student' or 'mentor'."
+      );
     }
   }
 
   /**
-   * 
+   *
    * @param {String} username - NIM for student or NIP for Mentor
    * @param {String} password
    * @param {String} ref - must be 'student' or 'mentor'
@@ -34,60 +38,44 @@ class UserController {
    *    password: 'imMentor',
    *    ref: 'mentor'
    * }
-   * @returns 
+   * @returns
    */
-  async register ({ username, password, ref }) {
-    if (!ref) {
-      throw new Error("Reference can't be empty!")
-    }
+  async register({ username, password, ref }) {
+    if (!ref) throw new CustomError(400, "Reference can't be empty!");
 
-    let user
+    let user;
 
-    try {
-      // Check if `ref` is valid
-      if (ref !== 'student' && ref !== 'mentor') {
-        throw new Error(
-          "Invalid reference type! Must be 'student' or 'mentor'."
-        )
-      }
+    // Use helper function to check user existence and create a new one
+    user = await this.findUserByUsername(ref, username);
 
-      // Use helper function to check user existence and create a new one
-      user = await this.findUserByUsername(ref, username)
+    if (user)
+      throw new CustomError(
+        409,
+        `${ref.charAt(0).toUpperCase() + ref.slice(1)} account already exists!`
+      );
 
-      if (user) {
-        throw new Error(
-          `${
-            ref.charAt(0).toUpperCase() + ref.slice(1)
-          } account already exists!`
-        )
-      }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10)
+    // Create new user based on the ref
+    user =
+      ref === "student"
+        ? new Student({ studentId: username, password: hashedPassword })
+        : new Mentor({ mentorId: username, password: hashedPassword });
 
-      // Create new user based on the ref
-      user =
-        ref === 'student'
-          ? new Student({ studentId: username, password: hashedPassword })
-          : new Mentor({ mentorId: username, password: hashedPassword })
+    // Save user
+    await user.save();
 
-      // Save user
-      await user.save()
-
-      return {
-        statusCode: 200,
-        message: 'Account successfully created!'
-      }
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message
-      }
-    }
+    return {
+      statusCode: 200,
+      data: {
+        message: "Account successfully created!",
+      },
+    };
   }
 
   /**
-   * 
+   *
    * @param {String} username - NIM for student or NIP for Mentor
    * @param {String} password
    * @param {String} ref - must be 'student' or 'mentor'
@@ -103,75 +91,65 @@ class UserController {
    *    password: 'imMentor',
    *    ref: 'mentor'
    * }
-   * @returns 
+   * @returns
    */
-  async login ({ username, password, ref }) {
-    if (!ref) {
-      throw new Error("Reference can't be empty!")
-    }
+  async login({ username, password, ref }) {
+    if (!ref) throw new CustomError(400, "Reference can't be empty!");
 
-    let user
+    let user;
 
-    try {
-      // Use helper function to find user
-      user = await this.findUserByUsername(ref, username)
+    // Use helper function to find user
+    user = await this.findUserByUsername(ref, username);
 
-      if (!user) {
-        throw new Error(
-          `${ref.charAt(0).toUpperCase() + ref.slice(1)} account not found!`
-        )
-      }
+    if (!user)
+      throw new CustomError(
+        404,
+        `${ref.charAt(0).toUpperCase() + ref.slice(1)} account not found!`
+      );
 
-      // Check password
-      const isPasswordMatch = await bcrypt.compare(password, user.password)
+    // Check password
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-      if (!isPasswordMatch) {
-        throw new Error('Invalid password!')
-      }
+    if (!isPasswordMatch) throw new CustomError(409, "Invalid password!");
 
-      return {
-        statusCode: 200,
-        message: 'Login successful!',
-        user: {
-          id: user._id,
-          username: ref === 'student' ? user.studentId : user.mentorId,
-          type: ref
-        }
-      }
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message
-      }
-    }
+    return {
+      statusCode: 200,
+      data: {
+        message: "Login successful!",
+        user: user,
+      },
+    };
   }
-  
-  async deleteRecite({reciteId}) {
-    if (!id) {
-      throw new Error("Invalid Id, please provide a correct Id!");
-    }
 
-    try {
-      const recite = await Recite.findByIdAndDelete(reciteId);
-      
-      if (!recite) {
-        throw new Error("Something went wrong, Can't Delete this recite at moment! Please try again later!");
-      }
+  async deleteRecite({ reciteId }) {
+    if (!reciteId)
+      throw new CustomError(400, "Invalid Id, please provide a correct Id!");
 
-      return{
-        statusCode: 200,
-        message: "Recite successfully deleted",
-        deletedRecite: recite
-      }
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message
-      }
-    }
+    const recite = await Recite.findByIdAndDelete(reciteId);
+
+    if (!recite) throw new CustomError(404, "Recite not found!");
+
+    return {
+      statusCode: 200,
+      data: { message: "Recite successfully deleted", deletedRecite: recite },
+    };
+  }
+
+  async viewRecite({ reciteId }) {
+    if (!reciteId)
+      throw new CustomError(400, "Invalid Id, please provide a correct Id!");
+
+    const recite = await Recite.findById(reciteId);
+
+    if (!recite) throw new CustomError(404, "Recite not found!");
+
+    return {
+      statusCode: 200,
+      data: { message: "Recite successfully deleted", recite: recite },
+    };
   }
 }
 
-const userController = new UserController()
+const userController = new UserController();
 
-export default userController
+export default userController;

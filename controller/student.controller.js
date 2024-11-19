@@ -1,5 +1,5 @@
-import Recite from "../model/recite.model";
-import Student from "../model/student.model";
+import Recite from "../model/recite.model.js";
+import Student from "../model/student.model.js";
 
 class StudentController {
   /**
