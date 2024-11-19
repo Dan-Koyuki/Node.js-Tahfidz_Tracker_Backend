@@ -1,7 +1,11 @@
 import bcrypt from 'bcrypt'
 import Mentor from '../model/mentor.model'
 import Student from '../model/student.model'
+import Recite from '../model/recite.model'
 
+/**
+ * @todo Implement JWT authentication for login and register endpoints.
+ */
 class UserController {
   async findUserByUsername (ref, username) {
     if (ref === 'student') {
@@ -13,6 +17,25 @@ class UserController {
     }
   }
 
+  /**
+   * 
+   * @param {String} username - NIM for student or NIP for Mentor
+   * @param {String} password
+   * @param {String} ref - must be 'student' or 'mentor'
+   * @example
+   * {
+   *    username: '1217050070',
+   *    password: 'myPassword',
+   *    ref: 'student'
+   * }
+   * @example
+   * {
+   *    username: '001278799937784',
+   *    password: 'imMentor',
+   *    ref: 'mentor'
+   * }
+   * @returns 
+   */
   async register ({ username, password, ref }) {
     if (!ref) {
       throw new Error("Reference can't be empty!")
@@ -63,6 +86,25 @@ class UserController {
     }
   }
 
+  /**
+   * 
+   * @param {String} username - NIM for student or NIP for Mentor
+   * @param {String} password
+   * @param {String} ref - must be 'student' or 'mentor'
+   * @example
+   * {
+   *    username: '1217050070',
+   *    password: 'myPassword',
+   *    ref: 'student'
+   * }
+   * @example
+   * {
+   *    username: '001278799937784',
+   *    password: 'imMentor',
+   *    ref: 'mentor'
+   * }
+   * @returns 
+   */
   async login ({ username, password, ref }) {
     if (!ref) {
       throw new Error("Reference can't be empty!")
@@ -103,125 +145,31 @@ class UserController {
       }
     }
   }
-
-  /**
-   *
-   * @param {id} default id of the user from mongoDB, from req.query
-   * @param {data} data of what will be updated, from req.body
-   */
-  async editMentor ({ id, data }) {
-    if (!id) {
-      throw new Error('Invalid ID!')
-    }
-
-    try {
-      // Find the mentor by ID
-      const mentor = await Mentor.findById(id)
-      if (!mentor) {
-        throw new Error('Mentor not found!')
-      }
-
-      // Only allow updates to valid fields
-      const allowedUpdates = ['mentorName', 'mentorContact', 'password']
-      const updateKeys = Object.keys(data)
-
-      // Validate the fields being updated
-      const isValidUpdate = updateKeys.every(key =>
-        allowedUpdates.includes(key)
-      )
-      if (!isValidUpdate) {
-        throw new Error('Invalid fields in the update request!')
-      }
-
-      // If password is being updated, hash it
-      if (data.password) {
-        data.password = await bcrypt.hash(data.password, 10)
-      }
-
-      // Apply the updates
-      updateKeys.forEach(key => {
-        mentor[key] = data[key]
-      })
-
-      // Save the updated mentor document
-      await mentor.save()
-
-      return {
-        statusCode: 200,
-        message: 'Mentor profile updated successfully!',
-        user: {
-          id: mentor.mentorId,
-          mentorName: mentor.mentorName,
-          mentorContact: mentor.mentorContact
-        }
-      }
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message
-      }
-    }
-  }
-
-  /**
-   *
-   * @param {id} default id of the user from mongoDB, from req.query
-   * @param {data} data of what will be updated, from req.body
-   */
-  async editStudent ({ id, data }) {
-    
-
-    try {
-      // Find the student by ID
-      const student = await Student.findById(id)
-      if (!student) {
-        throw new Error('Student not found!')
-      }
-
-      // Only allow updates to valid fields
-      const allowedUpdates = ['studentName', 'studentContact', 'password', 'studentMajor']
-      const updateKeys = Object.keys(data)
-
-      // Validate the fields being updated
-      const isValidUpdate = updateKeys.every(key =>
-        allowedUpdates.includes(key)
-      )
-      if (!isValidUpdate) {
-        throw new Error('Invalid fields in the update request!')
-      }
-
-      // If password is being updated, hash it
-      if (data.password) {
-        data.password = await bcrypt.hash(data.password, 10)
-      }
-
-      // Apply the updates
-      updateKeys.forEach(key => {
-        student[key] = data[key]
-      })
-
-      // Save the updated student document
-      await student.save()
-
-      return {
-        statusCode: 200,
-        message: 'Student profile updated successfully!',
-        user: {
-          id: student.mentorId,
-          studentName: student.studentName,
-          studentContact: student.studentContact,
-          studentMajor: student.studentMajor
-        }
-      }
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message
-      }
-    }
-  }
-
   
+  async deleteRecite({reciteId}) {
+    if (!id) {
+      throw new Error("Invalid Id, please provide a correct Id!");
+    }
+
+    try {
+      const recite = await Recite.findByIdAndDelete(reciteId);
+      
+      if (!recite) {
+        throw new Error("Something went wrong, Can't Delete this recite at moment! Please try again later!");
+      }
+
+      return{
+        statusCode: 200,
+        message: "Recite successfully deleted",
+        deletedRecite: recite
+      }
+    } catch (error) {
+      return {
+        statusCode: 400,
+        message: error.message
+      }
+    }
+  }
 }
 
 const userController = new UserController()

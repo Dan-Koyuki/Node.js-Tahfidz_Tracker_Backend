@@ -7,9 +7,10 @@ const ReciteSchema = new Schema(
     reciteAyat: { type: String, required: true },
     reciteLink: { type: String, required: true },
     reciteScore: { type: Number, default: 0 },
+    reciteReview: {type: String},
     reciteStatus: {
       type: String,
-      enum: ['PENDING', 'APPROVED', 'REJECTED', 'REVIEWED'],
+      enum: ['PENDING', 'REVIEWED'],
       default: 'PENDING'
     },
     reciteStudent: { type: String, required: true }, // Use studentId (String) instead of ObjectId
