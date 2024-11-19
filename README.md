@@ -12,7 +12,7 @@ This project was used to fulfill an Assignment on a course "Social Infomatics an
 
 ## Usage
 
-BASE_URL = `"https://tahfidz-tracker.vercel.app/"`
+BASE_URL = `"https://tahfidz-tracker.vercel.app"`
 
 ## Endpoint
 
