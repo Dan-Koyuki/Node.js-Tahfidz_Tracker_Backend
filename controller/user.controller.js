@@ -40,7 +40,7 @@ class UserController {
    * }
    * @returns
    */
-  async register({ username, password, ref }) {
+  async register({ username, password, ref, studentMentor }) {
     if (!ref) throw new CustomError(400, "Reference can't be empty!");
 
     let user;
@@ -57,10 +57,15 @@ class UserController {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    let mentor;
+    if (studentMentor) {
+      mentor = await Mentor.find({mentorName: studentMentor});
+    }
+
     // Create new user based on the ref
     user =
       ref === "student"
-        ? new Student({ studentId: username, password: hashedPassword })
+        ? new Student({ studentId: username, password: hashedPassword, studentMentor: mentor.mentorId })
         : new Mentor({ mentorId: username, password: hashedPassword });
 
     // Save user

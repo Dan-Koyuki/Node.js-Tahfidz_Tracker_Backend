@@ -3,6 +3,7 @@
 ## Anggota
 
 - Irwanto Danang Bahtiar (1217050070)
+- M Dzafadlan
 
 ## Explanation
 
@@ -27,12 +28,14 @@ BASE_URL = `""`
 - ref (a role reference. This must be 'student' or 'mentor')
 - username (this should be either NIM for Student and NIP for Mentor and should be unique)
 - password
+- studentMentor
 - example for student:
     ```json
     req.body = {
         username: '1217050070',
         password: 'myPassword',
-        ref: 'student'
+        ref: 'student',
+        studentMentor: 'Dzafadlan'
     }
     ```
 - example for mentor:
@@ -40,7 +43,8 @@ BASE_URL = `""`
     req.body = {
         username: '001278799937784',
         password: 'myPassword',
-        ref: 'mentor'
+        ref: 'mentor',
+        studentMentor: Null
     }
     ```
 **Output**:
