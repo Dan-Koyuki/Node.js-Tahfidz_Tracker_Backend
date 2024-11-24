@@ -126,6 +126,7 @@ class UserController {
       data: {
         message: "Login successful!",
         user: user,
+        role: ref
       },
     };
   }
