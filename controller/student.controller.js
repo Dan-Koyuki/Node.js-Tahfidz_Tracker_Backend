@@ -21,7 +21,10 @@ class StudentController {
   async uploadRecite ({ id, data }) {
     if (!id) throw new CustomError(400, 'Invalid ID!')
 
-    const student = await Student.findById(id).populate('mentor')
+    const student = await Student.findById(id).populate({
+      path: 'studentMentor', // Field to populate
+      select: 'mentorName mentorId' // Specify fields to retrieve from the Mentor model
+    })
 
     if (!student) throw new CustomError(404, 'Student not found!')
 
