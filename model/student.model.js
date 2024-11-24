@@ -6,17 +6,11 @@ const StudentSchema = new Schema(
     studentName: { type: String },
     studentMajor: { type: String }, //Program Studi
     studentContact: { type: String },
-    studentMentor: { type: String },
+    studentMentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' },
     password: { type: String, required: true }
   },
   { timestamps: true }
 )
-
-StudentSchema.virtual('mentor', {
-  ref: 'Mentor',
-  localField: 'studentMentor', // Field in the Student model that references the Mentor
-  foreignField: 'mentorId' // Field in the Mentor model that should match
-})
 
 StudentSchema.set('toObject', { virtuals: true })
 StudentSchema.set('toJSON', { virtuals: true })
