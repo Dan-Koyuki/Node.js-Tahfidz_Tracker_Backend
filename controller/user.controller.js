@@ -57,9 +57,13 @@ class UserController {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let mentor;
+    let mentorId;
     if (studentMentor) {
-      mentor = await Mentor.find({mentorName: studentMentor});
+      const mentor = await Mentor.findOne({ mentorName: studentMentor }); // Use findOne to get a single mentor
+      if (!mentor) {
+        throw new CustomError(404, "Mentor not found!");
+      }
+      mentorId = mentor._id; // Assign mentor ID
     }
 
     // Create new user based on the ref
