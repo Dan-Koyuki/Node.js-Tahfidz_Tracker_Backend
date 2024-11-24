@@ -63,11 +63,8 @@ class MentorController {
 
   async viewRecite({ id }) {
     if (!id) throw new CustomError(400, "ID can't be empty!");
-    const mentor = await Mentor.findById(id);
 
-    if (!mentor) throw new CustomError(404, "Mentor not found!");
-
-    const recites = await Recite.find({ reciteMentor: mentor.mentorId });
+    const recites = await Recite.find({ reciteMentor: id});
 
     if (!recites.length)
       throw new CustomError(404, "No recites found for this mentor.");
