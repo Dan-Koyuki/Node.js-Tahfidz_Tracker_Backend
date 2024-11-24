@@ -27,12 +27,14 @@ class StudentController {
       select: 'mentorName mentorId' // Specify fields to retrieve from the Mentor model
     })
 
+    console.log(student.studentMentor);
+
     if (!student) throw new CustomError(404, 'Student not found!')
 
     if (!student.studentMentor)
       throw new CustomError(404, 'Mentor not found for this student!')
 
-    data.reciteStudent = student.studentId
+    data.reciteStudent = student._id
     data.reciteMentor = student.studentMentor._id
 
     const reciteField = [
