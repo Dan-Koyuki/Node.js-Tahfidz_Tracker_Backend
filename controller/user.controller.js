@@ -65,7 +65,7 @@ class UserController {
     // Create new user based on the ref
     user =
       ref === "student"
-        ? new Student({ studentId: username, password: hashedPassword, studentMentor: mentor.mentorId })
+        ? new Student({ studentId: username, password: hashedPassword, studentMentor: mentor._id })
         : new Mentor({ mentorId: username, password: hashedPassword });
 
     // Save user
