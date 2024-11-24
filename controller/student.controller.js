@@ -141,7 +141,7 @@ class StudentController {
   }
 
   async getAllStudent() {
-    const students = await Student.find();
+    const students = await Student.find().populate("mentor");
     if (!students.length) throw new CustomError(404, "No students found.");
 
     return {
