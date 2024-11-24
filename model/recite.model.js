@@ -12,8 +12,8 @@ const ReciteSchema = new Schema(
       enum: ['PENDING', 'REVIEWED'],
       default: 'PENDING'
     },
-    reciteStudent: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' }, // Use studentId (String) instead of ObjectId
-    reciteMentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' } // Use mentorId (String) instead of ObjectId
+    reciteStudent: { type: Schema.Types.ObjectId, ref: 'Student' }, // Use studentId (String) instead of ObjectId
+    reciteMentor: { type: Schema.Types.ObjectId, ref: 'Mentor' } // Use mentorId (String) instead of ObjectId
   },
   { timestamps: true }
 )

@@ -1,4 +1,4 @@
-import mongoose, { model, Schema } from 'mongoose'
+import { model, Schema } from 'mongoose'
 
 const StudentSchema = new Schema(
   {
@@ -6,14 +6,11 @@ const StudentSchema = new Schema(
     studentName: { type: String },
     studentMajor: { type: String }, //Program Studi
     studentContact: { type: String },
-    studentMentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' },
+    studentMentor: { type: Schema.Types.ObjectId, ref: 'Mentor' },
     password: { type: String, required: true }
   },
   { timestamps: true }
 )
-
-StudentSchema.set('toObject', { virtuals: true })
-StudentSchema.set('toJSON', { virtuals: true })
 
 const Student = model('Student', StudentSchema)
 
