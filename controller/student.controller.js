@@ -126,11 +126,8 @@ class StudentController {
 
   async viewRecite ({ id }) {
     if (!id) throw new CustomError(400, "ID can't be empty!")
-    const student = await Student.findById(id)
 
-    if (!student) throw new CustomError(404, 'Student not found!')
-
-    const recites = await Recite.find({ reciteStudent: student.studentId })
+    const recites = await Recite.find({ reciteStudent: id })
 
     if (!recites.length)
       throw new CustomError(404, 'No recites found for this student.')
