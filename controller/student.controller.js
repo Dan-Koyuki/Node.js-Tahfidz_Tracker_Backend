@@ -1,3 +1,4 @@
+import CustomError from '../function/customError.js'
 import Recite from '../model/recite.model.js'
 import Student from '../model/student.model.js'
 
@@ -27,8 +28,7 @@ class StudentController {
 
     if (!student) throw new CustomError(404, 'Student not found!')
 
-    if (!student.mentor)
-      throw new CustomError(404, 'Mentor not found for this student!')
+    if (!student.mentor) throw new CustomError(404, 'Mentor not found for this student!')
 
     data.reciteStudent = student.studentId
     data.reciteMentor = student.studentMentor._id
