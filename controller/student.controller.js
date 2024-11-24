@@ -24,11 +24,13 @@ class StudentController {
 
     const student = await Student.findById(id).populate({
       path: 'studentMentor', // Field to populate
+      select: 'mentorName mentorId' // Specify fields to retrieve from the Mentor model
     })
 
     if (!student) throw new CustomError(404, 'Student not found!')
 
-    if (!student.mentor) throw new CustomError(404, 'Mentor not found for this student!')
+    if (!student.studentMentor)
+      throw new CustomError(404, 'Mentor not found for this student!')
 
     data.reciteStudent = student.studentId
     data.reciteMentor = student.studentMentor._id
