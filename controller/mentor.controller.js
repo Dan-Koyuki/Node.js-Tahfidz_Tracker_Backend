@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import CustomError from "../function/customError.js";
 import Mentor from "../model/mentor.model.js";
 import Recite from "../model/recite.model.js";
