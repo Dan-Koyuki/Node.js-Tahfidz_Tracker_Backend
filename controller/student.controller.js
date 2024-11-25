@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import CustomError from '../function/customError.js'
 import Recite from '../model/recite.model.js'
 import Student from '../model/student.model.js'
