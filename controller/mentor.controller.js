@@ -127,9 +127,7 @@ class MentorController {
 
   async viewStudent({id}) {
     if (!id) throw new CustomError(400, "ID can't be empty!");
-    const mentor = await Mentor.findById(id);
-    if (!mentor) throw new CustomError(404, "Mentor not found!");
-    const students = await Student.find({ studentMentor: mentor.mentorId });
+    const students = await Student.find({ studentMentor: id });
     if (!students.length) throw new CustomError(404, "No students found!");
     return {
       statusCode: 200,
