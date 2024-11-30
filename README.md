@@ -3,7 +3,7 @@
 ## Anggota
 
 - Irwanto Danang Bahtiar (1217050070)
-- M Dzafadlan
+- M Dzafadlan F Muzakki (1217050075)
 
 ## Explanation
 
